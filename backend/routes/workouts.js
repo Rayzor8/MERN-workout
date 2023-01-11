@@ -1,25 +1,21 @@
 const express = require('express')
-const { createSingleWorkout } = require('../controllers/workoutControllers')
+const {
+  createSingleWorkout,
+  getWorkouts,
+  getSingleWorkout,
+  deleteWorkout,
+  updateWorkout
+} = require('../controllers/workoutControllers')
 const router = express.Router()
-const WorkoutModel = require('../models/workoutModel')
 
-router.get('/', async (req, res) => {
-  const workouts = await WorkoutModel.find({}).sort({ createAt: -1 })
-  res.status(200).send(workouts)
-})
+router.get('/', getWorkouts)
 
 router.post('/', createSingleWorkout)
 
-router.get('/:id', (req, res) => {
-  res.send({ message: 'get single workout ' })
-})
+router.get('/:id', getSingleWorkout)
 
-router.put('/:id', (req, res) => {
-  res.send({ message: 'edit single workout ' })
-})
+router.patch('/:id', updateWorkout)
 
-router.delete('/:id', (req, res) => {
-  res.send({ message: 'delete single workout ' })
-})
+router.delete('/:id', deleteWorkout)
 
 module.exports = router
