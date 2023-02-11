@@ -1,12 +1,12 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 
-interface UsefetchProps {
-  url: string;
-}
 
-const useFetch = ({ url }: UsefetchProps) => {
-  const [data, setData] = useState(null);
+const useFetch = <T,>(
+  url: string,
+  initialState: T
+): [data: T, errorFetch: string, isLoading: boolean] => {
+  const [data, setData] = useState(initialState);
   const [errorFetch, setErrorFetch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
