@@ -2,6 +2,7 @@ import {
   Button,
   Flex,
   FormControl,
+  FormErrorMessage,
   FormHelperText,
   FormLabel,
   Input,
@@ -13,8 +14,9 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/react";
-import { title } from "process";
+import axios from "axios";
 import { SyntheticEvent, useState } from "react";
+import { AxiosError } from "axios";
 
 interface ModalFormProps {
   isOpen: boolean;
@@ -28,15 +30,35 @@ const ModalForm = ({ isOpen, onClose }: ModalFormProps) => {
     load: "",
   });
 
-  const onSubmit = (e: SyntheticEvent) => {
-    const { title, reps, load } = formData;
+  const [errorMsg, setErrorMsg] = useState<null | string>(null);
+
+  const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
+    const { title, reps, load } = formData;
     const workouts = { title, reps, load };
-    console.log(workouts);
-    onClose();
-    setFormData({ title: "", reps: "", load: "" });
+
+    try {
+      const response = await axios.post("/api/workouts", workouts);
+
+      if (response) {
+        setErrorMsg(null);
+        alert("new workout Added");
+        setFormData({ title: "", reps: "", load: "" });
+        setErrorMsg(null);
+        onClose();
+      }
+    } catch (error) {
+      console.log("error bro");
+      const errAxios = error as AxiosError;
+
+      if (errAxios) {
+        console.log('masuk Axios err')
+        setErrorMsg(errAxios.message);
+      }
+    }
   };
 
+  console.log(errorMsg);
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
@@ -92,6 +114,10 @@ const ModalForm = ({ isOpen, onClose }: ModalFormProps) => {
                 value={formData.load}
               />
               <FormHelperText>Please enter something</FormHelperText>
+            </FormControl>
+
+            <FormControl>
+              {errorMsg && <FormErrorMessage>{errorMsg}</FormErrorMessage>}
             </FormControl>
           </Flex>
         </ModalBody>
