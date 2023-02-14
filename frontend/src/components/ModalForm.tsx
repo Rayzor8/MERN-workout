@@ -2,7 +2,7 @@ import {
   Button,
   Flex,
   FormControl,
-  FormErrorMessage,
+  Text,
   FormHelperText,
   FormLabel,
   Input,
@@ -13,10 +13,13 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { SyntheticEvent, useState } from "react";
 import { AxiosError } from "axios";
+import useWorkoutsCtx from "../hooks/useWorkoutsCtx";
+import { WorkoutsEnum } from "../contexts/WorkoutContext";
 
 interface ModalFormProps {
   isOpen: boolean;
@@ -31,6 +34,8 @@ const ModalForm = ({ isOpen, onClose }: ModalFormProps) => {
   });
 
   const [errorMsg, setErrorMsg] = useState<null | string>(null);
+  const toast = useToast();
+  const { dispatch } = useWorkoutsCtx();
 
   const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -39,26 +44,29 @@ const ModalForm = ({ isOpen, onClose }: ModalFormProps) => {
 
     try {
       const response = await axios.post("/api/workouts", workouts);
-
       if (response) {
         setErrorMsg(null);
-        alert("new workout Added");
+        dispatch({ type: WorkoutsEnum.CREATE_WORKOUT, payload: response.data });
         setFormData({ title: "", reps: "", load: "" });
         setErrorMsg(null);
         onClose();
+        toast({
+          title: "Success",
+          description: "Success create new workout",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+          position: "top",
+        });
       }
     } catch (error) {
-      console.log("error bro");
       const errAxios = error as AxiosError;
-
       if (errAxios) {
-        console.log('masuk Axios err')
         setErrorMsg(errAxios.message);
       }
     }
   };
 
-  console.log(errorMsg);
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
@@ -116,9 +124,11 @@ const ModalForm = ({ isOpen, onClose }: ModalFormProps) => {
               <FormHelperText>Please enter something</FormHelperText>
             </FormControl>
 
-            <FormControl>
-              {errorMsg && <FormErrorMessage>{errorMsg}</FormErrorMessage>}
-            </FormControl>
+            {errorMsg && (
+              <Text color="red.400" fontSize="sm">
+                {errorMsg}
+              </Text>
+            )}
           </Flex>
         </ModalBody>
         <ModalFooter>
