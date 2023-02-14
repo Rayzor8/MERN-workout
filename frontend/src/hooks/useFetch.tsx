@@ -1,14 +1,15 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-
-
+import useWorkoutsCtx from "./useWorkoutsCtx";
+import { WorkoutsEnum } from "../contexts/WorkoutContext";
 const useFetch = <T,>(
   url: string,
   initialState: T
-): [data: T, errorFetch: string, isLoading: boolean] => {
-  const [data, setData] = useState(initialState);
+): [ errorFetch: string, isLoading: boolean] => {
   const [errorFetch, setErrorFetch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const {dispatch} = useWorkoutsCtx()
 
   useEffect(() => {
     async function getWorkouts() {
@@ -18,7 +19,7 @@ const useFetch = <T,>(
           //   process.env.REACT_APP_API_URL as string
           url
         );
-        setData(response.data);
+        dispatch({type:WorkoutsEnum.SET_WORKOUTS,payload:response.data});
       } catch (err) {
         if (err instanceof Error) {
           console.log(err);
@@ -32,8 +33,8 @@ const useFetch = <T,>(
     }
 
     getWorkouts();
-  }, [url]);
-  return [data, errorFetch, isLoading];
+  }, [url,dispatch]);
+  return [ errorFetch, isLoading];
 };
 
 export default useFetch;

@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import WorkoutsContextProvider from "./contexts/WorkoutContext";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -18,7 +19,7 @@ const colors = {
 };
 
 const fonts = {
-  heading:'Inter',
+  heading: "Inter",
   body: "Poppins",
 };
 
@@ -27,7 +28,9 @@ const theme = extendTheme({ colors, fonts });
 root.render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
-      <App />
+      <WorkoutsContextProvider>
+        <App />
+      </WorkoutsContextProvider>
     </ChakraProvider>
   </React.StrictMode>
 );
