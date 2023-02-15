@@ -14,12 +14,13 @@ import {
   ModalHeader,
   ModalOverlay,
   useToast,
+  Spinner,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { SyntheticEvent, useState } from "react";
-import { AxiosError } from "axios";
 import useWorkoutsCtx from "../hooks/useWorkoutsCtx";
 import { WorkoutsEnum } from "../contexts/WorkoutContext";
+
 
 interface ModalFormProps {
   isOpen: boolean;
@@ -33,7 +34,9 @@ const ModalForm = ({ isOpen, onClose }: ModalFormProps) => {
     load: "",
   });
 
-  const [errorMsg, setErrorMsg] = useState<null | string>(null);
+  const [errorMsg, setErrorMsg] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [emptyFields,setEmptyFields] = useState< string[]>([])
   const toast = useToast();
   const { dispatch } = useWorkoutsCtx();
 
@@ -41,31 +44,41 @@ const ModalForm = ({ isOpen, onClose }: ModalFormProps) => {
     e.preventDefault();
     const { title, reps, load } = formData;
     const workouts = { title, reps, load };
+    setIsLoading(true);
+    setErrorMsg(null);
 
     try {
       const response = await axios.post("/api/workouts", workouts);
       if (response) {
         setErrorMsg(null);
+        setEmptyFields([])
         dispatch({ type: WorkoutsEnum.CREATE_WORKOUT, payload: response.data });
         setFormData({ title: "", reps: "", load: "" });
-        setErrorMsg(null);
         onClose();
         toast({
           title: "Success",
           description: "Success create new workout",
           status: "success",
-          duration: 3000,
+          duration: 1000,
           isClosable: true,
           position: "top",
         });
       }
-    } catch (error) {
-      const errAxios = error as AxiosError;
-      if (errAxios) {
-        setErrorMsg(errAxios.message);
+    } catch (error: any) {
+      if (error) {
+        setErrorMsg(error.response.data);
+        setEmptyFields(error.response.data.emptyBody)
       }
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  function handleClose() {
+    setErrorMsg(null);
+    onClose();
+    setEmptyFields([])
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -91,7 +104,8 @@ const ModalForm = ({ isOpen, onClose }: ModalFormProps) => {
                 }
                 value={formData.title}
               />
-              <FormHelperText>Please enter something</FormHelperText>
+              {emptyFields.includes('title') && <FormHelperText>Please enter title</FormHelperText> }
+              
             </FormControl>
             <FormControl>
               <FormLabel>Reps</FormLabel>
@@ -106,7 +120,7 @@ const ModalForm = ({ isOpen, onClose }: ModalFormProps) => {
                 }
                 value={formData.reps}
               />
-              <FormHelperText>Please enter something</FormHelperText>
+             {emptyFields.includes('reps') && <FormHelperText>Please enter reps</FormHelperText> }
             </FormControl>
             <FormControl>
               <FormLabel>Load</FormLabel>
@@ -121,22 +135,25 @@ const ModalForm = ({ isOpen, onClose }: ModalFormProps) => {
                 }
                 value={formData.load}
               />
-              <FormHelperText>Please enter something</FormHelperText>
+           {emptyFields.includes('load') && <FormHelperText>Please enter load</FormHelperText> }
             </FormControl>
 
             {errorMsg && (
               <Text color="red.400" fontSize="sm">
-                {errorMsg}
+                {errorMsg.error}
               </Text>
             )}
           </Flex>
         </ModalBody>
         <ModalFooter>
-          <Button colorScheme="blue" mr={3} onClick={onClose}>
+          <Button colorScheme="blue" mr={3} onClick={handleClose}>
             Close
           </Button>
           <Button variant="ghost" type="submit" form="create-form">
-            Submit
+            <Flex gap={2} justifyContent="center" alignItems="center">
+              {isLoading && <Spinner />}
+              Submit
+            </Flex>
           </Button>
         </ModalFooter>
       </ModalContent>

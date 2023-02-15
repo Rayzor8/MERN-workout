@@ -1,4 +1,10 @@
-import { Button, Flex, SimpleGrid, useDisclosure } from "@chakra-ui/react";
+import {
+  Button,
+  Flex,
+  SimpleGrid,
+  useDisclosure,
+} from "@chakra-ui/react";
+import LoadSkeleton from "../components/LoadSkeleton";
 import ModalForm from "../components/ModalForm";
 import WorkoutDetail from "../components/WorkoutDetail";
 import useFetch from "../hooks/useFetch";
@@ -7,13 +13,12 @@ import { WorkoutsType } from "../types";
 
 const HomePage = () => {
   const [errorFetch, isLoading] = useFetch<WorkoutsType[] | null>(
-    process.env.REACT_APP_API_URL as string,
-    null
+    process.env.REACT_APP_API_URL as string
   );
   const {
     state: { workouts },
   } = useWorkoutsCtx();
-  
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <Flex as="section" gap={4} direction="column" justifyContent="start">
@@ -37,7 +42,7 @@ const HomePage = () => {
           ))}
       </SimpleGrid>
       {errorFetch}
-      {isLoading && "Loading..."}
+      {isLoading && <LoadSkeleton />}
     </Flex>
   );
 };

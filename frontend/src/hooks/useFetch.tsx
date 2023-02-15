@@ -4,11 +4,9 @@ import useWorkoutsCtx from "./useWorkoutsCtx";
 import { WorkoutsEnum } from "../contexts/WorkoutContext";
 const useFetch = <T,>(
   url: string,
-  initialState: T
 ): [ errorFetch: string, isLoading: boolean] => {
   const [errorFetch, setErrorFetch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
   const {dispatch} = useWorkoutsCtx()
 
   useEffect(() => {

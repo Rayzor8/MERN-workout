@@ -1,9 +1,4 @@
-import {
-  createContext,
-  Dispatch,
-  ReactNode,
-  useReducer,
-} from "react";
+import { createContext, Dispatch, ReactNode, useReducer } from "react";
 import { WorkoutsType } from "../types";
 
 interface ProviderProps {
@@ -18,6 +13,7 @@ interface WorkoutsCtx {
 export enum WorkoutsEnum {
   SET_WORKOUTS = "SET_WORKOUTS",
   CREATE_WORKOUT = "CREATE_WORKOUT",
+  DELETE_WORKOUT = "DELETE_WORKOUT",
 }
 
 interface WorkoutsAction {
@@ -53,6 +49,12 @@ export function workoutsReducer(
     case WorkoutsEnum.CREATE_WORKOUT:
       return {
         workouts: [payload, ...state.workouts],
+      };
+    case WorkoutsEnum.DELETE_WORKOUT:
+      return {
+        workouts: state.workouts.filter(
+          (workout) => workout._id !== payload._id
+        ),
       };
     default:
       return state;

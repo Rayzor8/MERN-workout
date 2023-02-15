@@ -4,9 +4,13 @@ const mongoose = require('mongoose')
 const createSingleWorkout = async (req, res) => {
   const { title, reps, load } = req.body
 
-  if (!title && !reps && !load) {
-    return res.status(400).json({ message: 'Please enter all input value' })
-  }
+  const emptyBody = []
+
+  if (!title) emptyBody.push('title')
+  if (!reps) emptyBody.push('reps')
+  if (!load) emptyBody.push('load')
+
+  if (emptyBody.length > 0) return res.status(404).json({ error: 'Please enter all input value', emptyBody })
 
   try {
     const workout = await WorkoutModel.create({ title, reps, load })
@@ -54,7 +58,7 @@ const deleteWorkout = async (req, res) => {
     return res.status(404).json({ message: 'Cannot find workout' })
   }
 
-  res.status(200).json({ message: 'Success delete workout' })
+  res.status(200).json(findIdAndDelete)
 }
 
 const updateWorkout = async (req, res) => {
